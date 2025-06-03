@@ -1,4 +1,3 @@
-
 import { useState } from "react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -11,6 +10,39 @@ import { TablesInsert } from "@/integrations/supabase/types"
 interface ClientFormProps {
   onSuccess?: () => void
   onCancel?: () => void
+}
+
+// Função para converter data dd/mm/aaaa para YYYY-MM-DD
+const formatDateForDatabase = (dateStr: string): string => {
+  if (!dateStr) return ""
+  
+  // Se já está no formato YYYY-MM-DD, retorna como está
+  if (dateStr.match(/^\d{4}-\d{2}-\d{2}$/)) {
+    return dateStr
+  }
+  
+  // Se está no formato dd/mm/aaaa
+  const match = dateStr.match(/^(\d{2})\/(\d{2})\/(\d{4})$/)
+  if (match) {
+    const [, day, month, year] = match
+    return `${year}-${month}-${day}`
+  }
+  
+  return ""
+}
+
+// Função para converter data YYYY-MM-DD para dd/mm/aaaa
+const formatDateForDisplay = (dateStr: string): string => {
+  if (!dateStr) return ""
+  
+  // Se está no formato YYYY-MM-DD
+  const match = dateStr.match(/^(\d{4})-(\d{2})-(\d{2})$/)
+  if (match) {
+    const [, year, month, day] = match
+    return `${day}/${month}/${year}`
+  }
+  
+  return dateStr
 }
 
 export const ClientForm = ({ onSuccess, onCancel }: ClientFormProps) => {
@@ -37,7 +69,13 @@ export const ClientForm = ({ onSuccess, onCancel }: ClientFormProps) => {
       return
     }
 
-    createCliente.mutate(clienteData, {
+    // Converter a data para o formato do banco antes de enviar
+    const dataToSubmit = {
+      ...clienteData,
+      aniversario: formatDateForDatabase(clienteData.aniversario || "")
+    }
+
+    createCliente.mutate(dataToSubmit, {
       onSuccess: () => {
         setClienteData({
           tipo: "PF",
@@ -147,7 +185,7 @@ export const ClientForm = ({ onSuccess, onCancel }: ClientFormProps) => {
             <Label htmlFor="aniversario">Data de Aniversário</Label>
             <Input 
               id="aniversario" 
-              placeholder="DD/MM" 
+              placeholder="dd/mm/aaaa" 
               value={clienteData.aniversario}
               onChange={(e) => setClienteData(prev => ({ ...prev, aniversario: e.target.value }))}
             />

@@ -12,8 +12,20 @@ import {
   Gift
 } from "lucide-react"
 import { useMarketing } from "@/hooks/useMarketing"
-import { format, parse, isValid } from "date-fns"
-import { ptBR } from "date-fns/locale"
+
+// Função para converter data YYYY-MM-DD para dd/mm/aaaa
+const formatDateForDisplay = (dateStr: string | null): string => {
+  if (!dateStr) return ""
+  
+  // Se está no formato YYYY-MM-DD
+  const match = dateStr.match(/^(\d{4})-(\d{2})-(\d{2})$/)
+  if (match) {
+    const [, year, month, day] = match
+    return `${day}/${month}/${year}`
+  }
+  
+  return dateStr
+}
 
 const Marketing = () => {
   const [searchTerm, setSearchTerm] = useState("")
@@ -23,7 +35,7 @@ const Marketing = () => {
   const filteredMarketing = marketing.filter(contact => 
     contact.nome_cliente.toLowerCase().includes(searchTerm.toLowerCase()) ||
     contact.telefone?.includes(searchTerm) ||
-    contact.data_aniversario?.includes(searchTerm)
+    (contact.data_aniversario && formatDateForDisplay(contact.data_aniversario).includes(searchTerm))
   )
 
   // Função para verificar se o aniversário é próximo (próximos 30 dias)
@@ -31,22 +43,25 @@ const Marketing = () => {
     if (!dateStr) return false
     
     try {
-      // Assumir formato dd/MM
-      const [day, month] = dateStr.split("/")
-      if (!day || !month) return false
+      // Converter YYYY-MM-DD para Date
+      const birthDate = new Date(dateStr)
+      if (isNaN(birthDate.getTime())) return false
       
-      const currentYear = new Date().getFullYear()
-      const birthDate = new Date(currentYear, parseInt(month) - 1, parseInt(day))
       const today = new Date()
+      const currentYear = today.getFullYear()
+      
+      // Ajustar para o ano atual
+      const thisYearBirthday = new Date(currentYear, birthDate.getMonth(), birthDate.getDate())
+      
+      // Se já passou este ano, verificar no próximo ano
+      if (thisYearBirthday < today) {
+        thisYearBirthday.setFullYear(currentYear + 1)
+      }
+      
       const thirtyDaysFromNow = new Date()
       thirtyDaysFromNow.setDate(today.getDate() + 30)
       
-      // Se já passou este ano, verificar no próximo ano
-      if (birthDate < today) {
-        birthDate.setFullYear(currentYear + 1)
-      }
-      
-      return birthDate >= today && birthDate <= thirtyDaysFromNow
+      return thisYearBirthday >= today && thisYearBirthday <= thirtyDaysFromNow
     } catch {
       return false
     }
@@ -171,7 +186,7 @@ const Marketing = () => {
                     {contact.data_aniversario && (
                       <div className="text-sm text-muted-foreground flex items-center gap-1">
                         <Calendar className="h-3 w-3" />
-                        {contact.data_aniversario}
+                        {formatDateForDisplay(contact.data_aniversario)}
                       </div>
                     )}
                     {contact.telefone && (
@@ -215,7 +230,7 @@ const Marketing = () => {
                     <div className="font-medium text-foreground">{contact.nome_cliente}</div>
                     <div className="text-sm text-muted-foreground flex items-center gap-1">
                       <Calendar className="h-3 w-3" />
-                      {contact.data_aniversario}
+                      {formatDateForDisplay(contact.data_aniversario)}
                     </div>
                     {contact.telefone && (
                       <div className="text-sm text-muted-foreground flex items-center gap-1">

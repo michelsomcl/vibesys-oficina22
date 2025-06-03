@@ -23,6 +23,20 @@ import { ClientForm } from "@/components/ClientForm"
 import { EditClienteDialog } from "@/components/EditClienteDialog"
 import { ClienteHistoricoDialog } from "@/components/ClienteHistoricoDialog"
 
+// Função para converter data YYYY-MM-DD para dd/mm/aaaa
+const formatDateForDisplay = (dateStr: string | null): string => {
+  if (!dateStr) return ""
+  
+  // Se está no formato YYYY-MM-DD
+  const match = dateStr.match(/^(\d{4})-(\d{2})-(\d{2})$/)
+  if (match) {
+    const [, year, month, day] = match
+    return `${day}/${month}/${year}`
+  }
+  
+  return dateStr
+}
+
 const Clientes = () => {
   const [searchTerm, setSearchTerm] = useState("")
   const [clientType, setClientType] = useState("all")
@@ -148,7 +162,7 @@ const Clientes = () => {
                     {cliente.aniversario && (
                       <div className="flex items-center gap-1">
                         <Calendar className="w-4 h-4" />
-                        {cliente.aniversario}
+                        {formatDateForDisplay(cliente.aniversario)}
                       </div>
                     )}
                   </div>

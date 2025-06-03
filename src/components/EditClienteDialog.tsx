@@ -14,6 +14,39 @@ interface EditClienteDialogProps {
   onOpenChange: (open: boolean) => void
 }
 
+// Função para converter data dd/mm/aaaa para YYYY-MM-DD
+const formatDateForDatabase = (dateStr: string): string => {
+  if (!dateStr) return ""
+  
+  // Se já está no formato YYYY-MM-DD, retorna como está
+  if (dateStr.match(/^\d{4}-\d{2}-\d{2}$/)) {
+    return dateStr
+  }
+  
+  // Se está no formato dd/mm/aaaa
+  const match = dateStr.match(/^(\d{2})\/(\d{2})\/(\d{4})$/)
+  if (match) {
+    const [, day, month, year] = match
+    return `${year}-${month}-${day}`
+  }
+  
+  return ""
+}
+
+// Função para converter data YYYY-MM-DD para dd/mm/aaaa
+const formatDateForDisplay = (dateStr: string): string => {
+  if (!dateStr) return ""
+  
+  // Se está no formato YYYY-MM-DD
+  const match = dateStr.match(/^(\d{4})-(\d{2})-(\d{2})$/)
+  if (match) {
+    const [, year, month, day] = match
+    return `${day}/${month}/${year}`
+  }
+  
+  return dateStr
+}
+
 export const EditClienteDialog = ({ cliente, open, onOpenChange }: EditClienteDialogProps) => {
   const [formData, setFormData] = useState({
     tipo: cliente.tipo,
@@ -21,7 +54,7 @@ export const EditClienteDialog = ({ cliente, open, onOpenChange }: EditClienteDi
     documento: cliente.documento,
     telefone: cliente.telefone || "",
     endereco: cliente.endereco || "",
-    aniversario: cliente.aniversario || "",
+    aniversario: formatDateForDisplay(cliente.aniversario || ""),
   })
 
   const updateCliente = useUpdateCliente()
@@ -34,7 +67,7 @@ export const EditClienteDialog = ({ cliente, open, onOpenChange }: EditClienteDi
       documento: cliente.documento,
       telefone: cliente.telefone || "",
       endereco: cliente.endereco || "",
-      aniversario: cliente.aniversario || "",
+      aniversario: formatDateForDisplay(cliente.aniversario || ""),
     })
   }, [cliente])
 
@@ -45,8 +78,14 @@ export const EditClienteDialog = ({ cliente, open, onOpenChange }: EditClienteDi
       return
     }
 
+    // Converter a data para o formato do banco antes de enviar
+    const dataToSubmit = {
+      ...formData,
+      aniversario: formatDateForDatabase(formData.aniversario)
+    }
+
     updateCliente.mutate(
-      { id: cliente.id, ...formData },
+      { id: cliente.id, ...dataToSubmit },
       {
         onSuccess: () => {
           onOpenChange(false)
@@ -119,6 +158,7 @@ export const EditClienteDialog = ({ cliente, open, onOpenChange }: EditClienteDi
               <Label htmlFor="aniversario">Aniversário</Label>
               <Input 
                 id="aniversario" 
+                placeholder="dd/mm/aaaa"
                 value={formData.aniversario}
                 onChange={(e) => setFormData(prev => ({ ...prev, aniversario: e.target.value }))}
               />
