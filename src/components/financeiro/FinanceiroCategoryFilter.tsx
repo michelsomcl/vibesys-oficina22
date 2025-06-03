@@ -28,12 +28,12 @@ export const FinanceiroCategoryFilter = ({
     <div className="flex items-end gap-2">
       <div className="flex-1">
         <Label htmlFor="categoria-filter">Filtrar por Categoria</Label>
-        <Select value={selectedCategoryId || ""} onValueChange={(value) => onCategoryChange(value || null)}>
+        <Select value={selectedCategoryId || "all"} onValueChange={(value) => onCategoryChange(value === "all" ? null : value)}>
           <SelectTrigger id="categoria-filter">
             <SelectValue placeholder="Todas as categorias" />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="">Todas as categorias</SelectItem>
+            <SelectItem value="all">Todas as categorias</SelectItem>
             {categoriasFiltradas.map((categoria) => (
               <SelectItem key={categoria.id} value={categoria.id}>
                 <div className="flex items-center gap-2">
