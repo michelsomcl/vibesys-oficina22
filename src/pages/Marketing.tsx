@@ -1,4 +1,3 @@
-
 import { useState } from "react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
@@ -12,6 +11,7 @@ import {
   Gift
 } from "lucide-react"
 import { useMarketing } from "@/hooks/useMarketing"
+import { MarketingImageGallery } from "@/components/marketing/MarketingImageGallery"
 
 // Função para converter data YYYY-MM-DD para dd/mm/aaaa
 const formatDateForDisplay = (dateStr: string | null): string => {
@@ -167,6 +167,9 @@ const Marketing = () => {
           />
         </CardContent>
       </Card>
+
+      {/* Nova seção: Galeria de Imagens */}
+      <MarketingImageGallery />
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Lista de Contatos */}
