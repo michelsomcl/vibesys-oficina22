@@ -651,6 +651,19 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      aniversariantes_do_dia: {
+        Args: Record<PropertyKey, never>
+        Returns: {
+          cliente_id: string
+          created_at: string
+          data_aniversario: string | null
+          id: string
+          mensagem_enviada_em: string | null
+          nome_cliente: string
+          telefone: string | null
+          updated_at: string
+        }[]
+      }
       generate_conta_geral_number: {
         Args: Record<PropertyKey, never>
         Returns: string
