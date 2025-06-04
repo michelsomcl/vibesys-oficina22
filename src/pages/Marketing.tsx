@@ -1,3 +1,4 @@
+
 import { useState } from "react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
@@ -8,11 +9,9 @@ import {
   Calendar,
   Phone,
   Search,
-  Gift,
-  Plus
+  Gift
 } from "lucide-react"
 import { useMarketing } from "@/hooks/useMarketing"
-import { MarketingContactDialog } from "@/components/marketing/MarketingContactDialog"
 
 // Função para converter data YYYY-MM-DD para dd/mm/aaaa
 const formatDateForDisplay = (dateStr: string | null): string => {
@@ -30,7 +29,6 @@ const formatDateForDisplay = (dateStr: string | null): string => {
 
 const Marketing = () => {
   const [searchTerm, setSearchTerm] = useState("")
-  const [dialogOpen, setDialogOpen] = useState(false)
   const { data: marketing = [], isLoading } = useMarketing()
 
   // Filtrar dados baseado na busca
@@ -84,15 +82,9 @@ const Marketing = () => {
 
   return (
     <div className="space-y-6 animate-fade-in">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-3xl font-bold text-foreground">Marketing</h1>
-          <p className="text-muted-foreground">Gestão de contatos e relacionamento com clientes</p>
-        </div>
-        <Button onClick={() => setDialogOpen(true)}>
-          <Plus className="h-4 w-4 mr-2" />
-          Novo Contato
-        </Button>
+      <div>
+        <h1 className="text-3xl font-bold text-foreground">Marketing</h1>
+        <p className="text-muted-foreground">Gestão de contatos e relacionamento com clientes</p>
       </div>
 
       {/* Cards de Estatísticas */}
@@ -189,29 +181,20 @@ const Marketing = () => {
             <div className="space-y-4 max-h-96 overflow-y-auto">
               {filteredMarketing.map((contact) => (
                 <div key={contact.id} className="flex items-center justify-between p-3 border rounded-lg">
-                  <div className="flex items-center gap-3">
-                    {contact.imagem_url && (
-                      <img 
-                        src={contact.imagem_url} 
-                        alt={contact.nome_cliente}
-                        className="w-10 h-10 rounded-full object-cover"
-                      />
+                  <div className="space-y-1">
+                    <div className="font-medium text-foreground">{contact.nome_cliente}</div>
+                    {contact.data_aniversario && (
+                      <div className="text-sm text-muted-foreground flex items-center gap-1">
+                        <Calendar className="h-3 w-3" />
+                        {formatDateForDisplay(contact.data_aniversario)}
+                      </div>
                     )}
-                    <div className="space-y-1">
-                      <div className="font-medium text-foreground">{contact.nome_cliente}</div>
-                      {contact.data_aniversario && (
-                        <div className="text-sm text-muted-foreground flex items-center gap-1">
-                          <Calendar className="h-3 w-3" />
-                          {formatDateForDisplay(contact.data_aniversario)}
-                        </div>
-                      )}
-                      {contact.telefone && (
-                        <div className="text-sm text-muted-foreground flex items-center gap-1">
-                          <Phone className="h-3 w-3" />
-                          {contact.telefone}
-                        </div>
-                      )}
-                    </div>
+                    {contact.telefone && (
+                      <div className="text-sm text-muted-foreground flex items-center gap-1">
+                        <Phone className="h-3 w-3" />
+                        {contact.telefone}
+                      </div>
+                    )}
                   </div>
                   <div className="text-right">
                     {isUpcomingBirthday(contact.data_aniversario) && (
@@ -273,11 +256,6 @@ const Marketing = () => {
           </CardContent>
         </Card>
       </div>
-
-      <MarketingContactDialog 
-        open={dialogOpen}
-        onOpenChange={setDialogOpen}
-      />
     </div>
   )
 }
