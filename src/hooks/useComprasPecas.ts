@@ -55,11 +55,72 @@ export const useCreateCompraPeca = () => {
         .single()
 
       if (error) throw error
+
+      // Buscar o nome do fornecedor
+      const { data: fornecedor } = await supabase
+        .from("fornecedores")
+        .select("nome")
+        .eq("id", compra.fornecedor_id)
+        .single()
+
+      // Buscar a categoria "Peças"
+      const { data: categoria } = await supabase
+        .from("categorias")
+        .select("id")
+        .eq("nome", "Peças")
+        .eq("tipo", "despesa")
+        .single()
+
+      if (!categoria) {
+        console.error("Categoria 'Peças' não encontrada")
+        return data
+      }
+
+      // Verificar se já existe uma despesa para esta nota e fornecedor
+      const { data: despesaExistente } = await supabase
+        .from("despesas")
+        .select("id, valor")
+        .eq("categoria_id", categoria.id)
+        .ilike("observacoes", `%${compra.numero_nota}%`)
+        .ilike("observacoes", `%${fornecedor?.nome || ''}%`)
+        .maybeSingle()
+
+      const valorTotalCompra = compra.quantidade * compra.valor_custo
+      const observacoes = `Fornecedor: ${fornecedor?.nome || 'N/A'} - Nota: ${compra.numero_nota}`
+
+      if (despesaExistente) {
+        // Atualizar despesa existente somando o valor
+        const novoValor = Number(despesaExistente.valor) + valorTotalCompra
+        
+        await supabase
+          .from("despesas")
+          .update({ 
+            valor: novoValor,
+            updated_at: new Date().toISOString()
+          })
+          .eq("id", despesaExistente.id)
+      } else {
+        // Criar nova despesa
+        await supabase
+          .from("despesas")
+          .insert({
+            descricao: `Compra de Peças - Nota ${compra.numero_nota}`,
+            valor: valorTotalCompra,
+            data_vencimento: compra.data_compra || new Date().toISOString().split('T')[0],
+            categoria_id: categoria.id,
+            tipo: "Variável",
+            observacoes: observacoes,
+            status: "Pago",
+            data_pagamento: compra.data_compra || new Date().toISOString().split('T')[0]
+          })
+      }
+
       return data
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["compras_pecas"] })
       queryClient.invalidateQueries({ queryKey: ["pecas"] })
+      queryClient.invalidateQueries({ queryKey: ["despesas"] })
       toast.success("Compra de peça registrada com sucesso!")
     },
     onError: (error) => {
