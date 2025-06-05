@@ -87,6 +87,57 @@ export type Database = {
         }
         Relationships: []
       }
+      compras_pecas: {
+        Row: {
+          created_at: string
+          data_compra: string
+          fornecedor_id: string
+          id: string
+          numero_nota: string
+          peca_id: string
+          quantidade: number
+          updated_at: string
+          valor_custo: number
+        }
+        Insert: {
+          created_at?: string
+          data_compra?: string
+          fornecedor_id: string
+          id?: string
+          numero_nota: string
+          peca_id: string
+          quantidade: number
+          updated_at?: string
+          valor_custo: number
+        }
+        Update: {
+          created_at?: string
+          data_compra?: string
+          fornecedor_id?: string
+          id?: string
+          numero_nota?: string
+          peca_id?: string
+          quantidade?: number
+          updated_at?: string
+          valor_custo?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "compras_pecas_fornecedor_id_fkey"
+            columns: ["fornecedor_id"]
+            isOneToOne: false
+            referencedRelation: "fornecedores"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "compras_pecas_peca_id_fkey"
+            columns: ["peca_id"]
+            isOneToOne: false
+            referencedRelation: "pecas"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       despesas: {
         Row: {
           categoria_id: string | null
@@ -491,6 +542,7 @@ export type Database = {
       pecas: {
         Row: {
           created_at: string
+          custo: number | null
           estoque: number | null
           id: string
           nome: string
@@ -499,6 +551,7 @@ export type Database = {
         }
         Insert: {
           created_at?: string
+          custo?: number | null
           estoque?: number | null
           id?: string
           nome: string
@@ -507,6 +560,7 @@ export type Database = {
         }
         Update: {
           created_at?: string
+          custo?: number | null
           estoque?: number | null
           id?: string
           nome?: string

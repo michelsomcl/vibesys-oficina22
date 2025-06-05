@@ -1,4 +1,3 @@
-
 import { useState } from "react"
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
@@ -7,10 +6,11 @@ import { Label } from "@/components/ui/label"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog"
-import { Package, Plus, Search, Edit, Trash2 } from "lucide-react"
+import { Package, Plus, Search, Edit, Trash2, ShoppingCart } from "lucide-react"
 import { usePecas, useCreatePeca, useDeletePeca } from "@/hooks/usePecas"
 import { TablesInsert } from "@/integrations/supabase/types"
 import { EditPecaDialog } from "@/components/EditPecaDialog"
+import CompraPecaForm from "@/components/CompraPecaForm"
 
 const PecaForm = ({ onSuccess, onCancel }: { onSuccess?: () => void, onCancel?: () => void }) => {
   const [pecaData, setPecaData] = useState<TablesInsert<"pecas">>({
@@ -104,6 +104,7 @@ const PecaForm = ({ onSuccess, onCancel }: { onSuccess?: () => void, onCancel?: 
 const Pecas = () => {
   const [searchTerm, setSearchTerm] = useState("")
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false)
+  const [isPurchaseDialogOpen, setIsPurchaseDialogOpen] = useState(false)
   const [editingPeca, setEditingPeca] = useState<any>(null)
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false)
 
@@ -131,6 +132,14 @@ const Pecas = () => {
     setIsEditDialogOpen(true)
   }
 
+  const handlePurchaseSuccess = () => {
+    setIsPurchaseDialogOpen(false)
+  }
+
+  const handlePurchaseCancel = () => {
+    setIsPurchaseDialogOpen(false)
+  }
+
   if (isLoading) {
     return <div className="p-8">Carregando...</div>
   }
@@ -144,20 +153,37 @@ const Pecas = () => {
             Gerencie seu estoque de peças
           </p>
         </div>
-        <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
-          <DialogTrigger asChild>
-            <Button>
-              <Plus className="mr-2 h-4 w-4" />
-              Nova Peça
-            </Button>
-          </DialogTrigger>
-          <DialogContent>
-            <DialogHeader>
-              <DialogTitle>Cadastrar Nova Peça</DialogTitle>
-            </DialogHeader>
-            <PecaForm onSuccess={handleFormSuccess} onCancel={handleFormCancel} />
-          </DialogContent>
-        </Dialog>
+        <div className="flex gap-2">
+          <Dialog open={isPurchaseDialogOpen} onOpenChange={setIsPurchaseDialogOpen}>
+            <DialogTrigger asChild>
+              <Button variant="outline">
+                <ShoppingCart className="mr-2 h-4 w-4" />
+                Comprar Peças
+              </Button>
+            </DialogTrigger>
+            <DialogContent className="max-w-2xl">
+              <DialogHeader>
+                <DialogTitle>Registrar Compra de Peças</DialogTitle>
+              </DialogHeader>
+              <CompraPecaForm onSuccess={handlePurchaseSuccess} onCancel={handlePurchaseCancel} />
+            </DialogContent>
+          </Dialog>
+          
+          <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
+            <DialogTrigger asChild>
+              <Button>
+                <Plus className="mr-2 h-4 w-4" />
+                Nova Peça
+              </Button>
+            </DialogTrigger>
+            <DialogContent>
+              <DialogHeader>
+                <DialogTitle>Cadastrar Nova Peça</DialogTitle>
+              </DialogHeader>
+              <PecaForm onSuccess={handleFormSuccess} onCancel={handleFormCancel} />
+            </DialogContent>
+          </Dialog>
+        </div>
       </div>
 
       <Card>
@@ -184,6 +210,7 @@ const Pecas = () => {
                 <TableRow>
                   <TableHead>Nome</TableHead>
                   <TableHead>Valor Unitário</TableHead>
+                  <TableHead>Custo</TableHead>
                   <TableHead>Estoque</TableHead>
                   <TableHead className="text-right">Ações</TableHead>
                 </TableRow>
@@ -191,7 +218,7 @@ const Pecas = () => {
               <TableBody>
                 {filteredPecas.length === 0 ? (
                   <TableRow>
-                    <TableCell colSpan={4} className="text-center text-muted-foreground">
+                    <TableCell colSpan={5} className="text-center text-muted-foreground">
                       Nenhuma peça encontrada
                     </TableCell>
                   </TableRow>
@@ -200,6 +227,7 @@ const Pecas = () => {
                     <TableRow key={peca.id}>
                       <TableCell className="font-medium">{peca.nome}</TableCell>
                       <TableCell>R$ {peca.valor_unitario.toFixed(2)}</TableCell>
+                      <TableCell>R$ {(peca.custo || 0).toFixed(2)}</TableCell>
                       <TableCell>{peca.estoque || 0}</TableCell>
                       <TableCell className="text-right">
                         <div className="flex justify-end gap-2">
