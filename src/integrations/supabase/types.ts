@@ -227,7 +227,7 @@ export type Database = {
           created_at: string
           data_aniversario: string | null
           id: string
-          mensagem_enviada_em: string | null
+          mensagem_enviada: string | null
           nome_cliente: string
           telefone: string | null
           updated_at: string
@@ -237,7 +237,7 @@ export type Database = {
           created_at?: string
           data_aniversario?: string | null
           id?: string
-          mensagem_enviada_em?: string | null
+          mensagem_enviada?: string | null
           nome_cliente: string
           telefone?: string | null
           updated_at?: string
@@ -247,7 +247,7 @@ export type Database = {
           created_at?: string
           data_aniversario?: string | null
           id?: string
-          mensagem_enviada_em?: string | null
+          mensagem_enviada?: string | null
           nome_cliente?: string
           telefone?: string | null
           updated_at?: string
@@ -658,7 +658,7 @@ export type Database = {
           created_at: string
           data_aniversario: string | null
           id: string
-          mensagem_enviada_em: string | null
+          mensagem_enviada: string | null
           nome_cliente: string
           telefone: string | null
           updated_at: string
